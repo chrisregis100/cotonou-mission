@@ -56,6 +56,18 @@ flowchart LR
 | CameraController | `game/camera/third-person-camera.tsx` | Orbite souris (pointer lock), zoom molette, suivi amorti |
 | InteractionSystem | `game/interactions/interaction-system.ts` | Registre et sélection de l'interactable le plus proche |
 | DialogueSystem | `game/dialogue/*` | Schéma, moteur pur, chargement des dialogues |
+| Interactables du lieu | `game/interactions/location-interactables.tsx` | Instancie PNJ et objets décrits dans `data/locations` |
+
+## Interaction et dialogue
+
+1. Chaque `Interactable` s'enregistre dans `interactionRegistry` au montage.
+2. `PlayerController` interroge le registre 10 fois par seconde et place l'interactable le plus proche dans le store.
+3. La touche E (ou le clic sur l'invite) appelle `interact()` : ouverture du dialogue lié, ou passage au nœud suivant.
+4. Pendant un dialogue, le joueur est immobilisé, la souris est libérée et l'animation `talk` est jouée.
+
+## Débogage
+
+`window.__cotonouDebug` expose en lecture la position des pieds du joueur et l'état au sol. Les tests Playwright s'en servent pour vérifier déplacements et collisions.
 
 ## Personnage et collisions
 

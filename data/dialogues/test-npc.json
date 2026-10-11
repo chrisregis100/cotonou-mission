@@ -1,0 +1,30 @@
+{
+  "id": "test-npc-intro",
+  "speaker": "Commerçant (PNJ de test)",
+  "startNodeId": "greeting",
+  "nodes": {
+    "greeting": {
+      "text": "Bonjour ! Je suis un personnage de test. Je sers à vérifier les interactions et les dialogues du prototype.",
+      "next": "question"
+    },
+    "question": {
+      "text": "Tu veux savoir ce qui viendra ensuite ?",
+      "choices": [
+        { "id": "ask-next", "text": "Oui, raconte-moi.", "next": "next-steps" },
+        { "id": "ask-parcel", "text": "C'est quoi, ce colis là-bas ?", "next": "parcel" },
+        { "id": "leave", "text": "Plus tard, merci.", "next": "goodbye" }
+      ]
+    },
+    "next-steps": {
+      "text": "Bientôt, une vraie moto, un vrai quartier documenté et une première mission. Pour l'instant, tout ici est provisoire.",
+      "next": "goodbye"
+    },
+    "parcel": {
+      "text": "C'est un objet de test. Approche-toi et appuie sur E pour l'examiner.",
+      "next": "goodbye"
+    },
+    "goodbye": {
+      "text": "À tout à l'heure !"
+    }
+  }
+}

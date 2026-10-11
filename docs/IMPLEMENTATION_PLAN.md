@@ -6,7 +6,7 @@ Découpage issu du document maître (§11). Les rapports détaillés sont dans [
 | --- | --- | --- |
 | Bootstrap | Next.js 16, R3F, Rapier, Vitest, Playwright | terminé |
 | 0 — Prototype technique | Scène 3D, personnage de test, caméra 3e personne, sol, bâtiments provisoires, collisions | terminé |
-| 1 — Contrôles du personnage | Marche, course, animations, interaction contextuelle, dialogue de test | en cours |
+| 1 — Contrôles du personnage | Marche, course, animations, interaction contextuelle, dialogue de test | terminé |
 | 2 — Prototype de moto | Entrée/sortie, conduite, caméra de conduite, sons | à faire |
 | 3 — Blocage du quartier | Choix du quartier, carte de référence, rues et volumes | à faire (décision quartier ouverte) |
 | 4 — Assets réalistes | Bâtiments, matériaux, moto et personnage finaux | à faire |

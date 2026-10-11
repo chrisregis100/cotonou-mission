@@ -1,0 +1,11 @@
+{
+  "id": "test-parcel",
+  "speaker": "Colis (objet de test)",
+  "startNodeId": "inspect",
+  "nodes": {
+    "inspect": {
+      "speaker": "Vous",
+      "text": "Un carton fermé avec du ruban adhésif. Aucune étiquette pour l'instant : c'est un objet de test."
+    }
+  }
+}

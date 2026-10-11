@@ -32,6 +32,18 @@ export const CAMERA_CONFIG = {
   followSharpness: 12,
 } as const;
 
+export const PLAYER_MODEL_CONFIG = {
+  url: "/assets/models/characters/mannequin.glb",
+  crossFadeSeconds: 0.2,
+  /** Clip names inside the GLB (Quaternius Universal Animation Library). */
+  clips: {
+    idle: "Idle_Loop",
+    walk: "Walk_Loop",
+    run: "Jog_Fwd_Loop",
+    talk: "Idle_Talking_Loop",
+  },
+} as const;
+
 export const INTERACTION_CONFIG = {
   defaultRadius: 2,
   probeIntervalSeconds: 0.1,

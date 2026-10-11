@@ -25,5 +25,23 @@
     { "id": "se-house", "position": [21, -12], "size": [8, 7, 8], "color": "#cfc6b8" },
     { "id": "sw-house", "position": [-10, -10], "size": [6, 4, 10], "color": "#7fa38a" },
     { "id": "sw-tall", "position": [-10, -23], "size": [6, 8, 8], "color": "#d2a679", "rotationY": 0.2 }
+  ],
+  "interactables": [
+    {
+      "id": "test-merchant",
+      "kind": "npc",
+      "label": "Parler au commerçant (PNJ de test)",
+      "position": [6.2, 0.15, 10],
+      "rotationY": -1.5708,
+      "dialogueId": "test-npc-intro"
+    },
+    {
+      "id": "test-parcel",
+      "kind": "object",
+      "label": "Examiner le colis",
+      "position": [-6.3, 0.15, 7],
+      "radius": 1.6,
+      "dialogueId": "test-parcel"
+    }
   ]
 }

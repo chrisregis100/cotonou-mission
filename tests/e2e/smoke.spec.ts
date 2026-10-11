@@ -38,6 +38,34 @@ test.describe("parcours de base", () => {
     expect(x).toBeGreaterThan(-7);
     expect(y).toBeGreaterThan(0.1);
   });
+
+  test("le joueur parle au PNJ de test avec E", async ({ page }) => {
+    await page.goto("/play");
+    await waitForScene(page);
+
+    await page.keyboard.down("KeyW");
+    await page.waitForFunction(() => window.__cotonouDebug!.playerPosition[2] < 10.3);
+    await page.keyboard.up("KeyW");
+
+    const prompt = page.getByRole("button", { name: /Parler au commerçant/ });
+    await page.keyboard.down("KeyD");
+    await expect(prompt).toBeVisible({ timeout: 30_000 });
+    await page.keyboard.up("KeyD");
+
+    await page.keyboard.press("KeyE");
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText("Je suis un personnage de test");
+
+    await page.keyboard.press("KeyE");
+    await expect(dialog).toContainText("Tu veux savoir ce qui viendra ensuite ?");
+
+    await page.keyboard.press("Digit3");
+    await expect(dialog).toContainText("À tout à l'heure !");
+
+    await page.keyboard.press("Enter");
+    await expect(dialog).toBeHidden();
+    await expect(prompt).toBeVisible();
+  });
 });
 
 function collectPageErrors(page: Page) {

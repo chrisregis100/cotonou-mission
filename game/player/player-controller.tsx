@@ -2,18 +2,21 @@
 
 import { useFrame } from "@react-three/fiber";
 import { CapsuleCollider, RigidBody, useRapier, type RapierCollider, type RapierRigidBody } from "@react-three/rapier";
-import { useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef } from "react";
 import type { Group } from "three";
 
 import { createCameraRig, type CameraRig } from "@/game/camera/camera-rig";
 import { ThirdPersonCamera } from "@/game/camera/third-person-camera";
-import { PLAYER_CONFIG, PLAYER_FEET_OFFSET } from "@/game/core/config";
+import { INTERACTION_CONFIG, PLAYER_CONFIG, PLAYER_FEET_OFFSET } from "@/game/core/config";
 import { debugState } from "@/game/core/debug";
 import { useGameStore } from "@/game/core/game-store";
 import { getMoveVector } from "@/game/core/input-manager";
 import { cameraRelativeDirection, dampAngle } from "@/game/core/math";
 import { useKeyboardInput } from "@/game/core/use-keyboard-input";
+import { findNearestInteractable, interactionRegistry } from "@/game/interactions/interaction-system";
+import type { PlayerMotion } from "@/game/player/animation-state";
 import { PlaceholderCharacter } from "@/game/player/placeholder-character";
+import { PlayerModel } from "@/game/player/player-model";
 
 interface PlayerControllerProps {
   spawnPosition: [number, number, number];
@@ -29,7 +32,9 @@ export function PlayerController({ spawnPosition }: PlayerControllerProps) {
   const controllerRef = useRef<CharacterController | null>(null);
   const rigRef = useRef<CameraRig>(createCameraRig());
   const verticalVelocityRef = useRef(0);
-  const inputRef = useKeyboardInput();
+  const motionRef = useRef<PlayerMotion>({ horizontalSpeed: 0, isInDialogue: false });
+  const probeElapsedRef = useRef(0);
+  const inputRef = useKeyboardInput({ onInteract: handleInteract });
 
   useEffect(() => {
     const controller = world.createCharacterController(PLAYER_CONFIG.controllerOffset);
@@ -43,6 +48,7 @@ export function PlayerController({ spawnPosition }: PlayerControllerProps) {
       world.removeCharacterController(controller);
       controllerRef.current = null;
       useGameStore.getState().setSceneReady(false);
+      useGameStore.getState().setNearbyInteractable(null);
     };
   }, [world]);
 
@@ -54,8 +60,11 @@ export function PlayerController({ spawnPosition }: PlayerControllerProps) {
     if (!body || !collider || !controller || !visual) return;
 
     const delta = Math.min(rawDelta, PLAYER_CONFIG.maxFrameDelta);
+    const { dialogueSession, nearbyInteractable } = useGameStore.getState();
+    const isInDialogue = dialogueSession !== null;
     const input = inputRef.current;
-    const direction = cameraRelativeDirection(getMoveVector(input), rigRef.current.yaw);
+    const moveVector = isInDialogue ? { x: 0, z: 0 } : getMoveVector(input);
+    const direction = cameraRelativeDirection(moveVector, rigRef.current.yaw);
     const speed = input.run ? PLAYER_CONFIG.runSpeed : PLAYER_CONFIG.walkSpeed;
 
     verticalVelocityRef.current = Math.max(
@@ -78,15 +87,28 @@ export function PlayerController({ spawnPosition }: PlayerControllerProps) {
     if (nextPosition.y < FALL_RESET_HEIGHT) Object.assign(nextPosition, toVector(spawnPosition));
     body.setNextKinematicTranslation(nextPosition);
 
-    if (direction.x !== 0 || direction.z !== 0) {
-      const targetYaw = Math.atan2(direction.x, direction.z);
+    const facingTarget =
+      isInDialogue && nearbyInteractable
+        ? { x: nearbyInteractable.position[0] - nextPosition.x, z: nearbyInteractable.position[2] - nextPosition.z }
+        : direction;
+    if (facingTarget.x !== 0 || facingTarget.z !== 0) {
+      const targetYaw = Math.atan2(facingTarget.x, facingTarget.z);
       visual.rotation.y = dampAngle(visual.rotation.y, targetYaw, PLAYER_CONFIG.turnSharpness, delta);
     }
+
+    motionRef.current.horizontalSpeed = delta > 0 ? Math.hypot(movement.x, movement.z) / delta : 0;
+    motionRef.current.isInDialogue = isInDialogue;
 
     debugState.playerPosition[0] = nextPosition.x;
     debugState.playerPosition[1] = nextPosition.y - PLAYER_FEET_OFFSET;
     debugState.playerPosition[2] = nextPosition.z;
     debugState.isPlayerGrounded = isGrounded;
+
+    probeElapsedRef.current += rawDelta;
+    if (probeElapsedRef.current >= INTERACTION_CONFIG.probeIntervalSeconds && !isInDialogue) {
+      probeElapsedRef.current = 0;
+      updateNearbyInteractable(debugState.playerPosition);
+    }
   });
 
   return (
@@ -101,12 +123,28 @@ export function PlayerController({ spawnPosition }: PlayerControllerProps) {
       >
         <CapsuleCollider ref={colliderRef} args={[PLAYER_CONFIG.capsuleHalfHeight, PLAYER_CONFIG.capsuleRadius]} />
         <group ref={visualRef} position-y={-PLAYER_FEET_OFFSET} rotation-y={Math.PI}>
-          <PlaceholderCharacter />
+          <Suspense fallback={<PlaceholderCharacter />}>
+            <PlayerModel motionRef={motionRef} />
+          </Suspense>
         </group>
       </RigidBody>
-      <ThirdPersonCamera rigRef={rigRef} targetRef={visualRef} />
+      <ThirdPersonCamera rigRef={rigRef} targetRef={visualRef} canLockPointer={canLockPointer} />
     </>
   );
+}
+
+function handleInteract() {
+  useGameStore.getState().interact();
+}
+
+function canLockPointer() {
+  return useGameStore.getState().dialogueSession === null;
+}
+
+function updateNearbyInteractable(playerPosition: readonly [number, number, number]) {
+  const { nearbyInteractable, setNearbyInteractable } = useGameStore.getState();
+  const nearest = findNearestInteractable(interactionRegistry.list(), playerPosition);
+  if (nearest?.id !== nearbyInteractable?.id) setNearbyInteractable(nearest);
 }
 
 function toVector([x, y, z]: [number, number, number]) {

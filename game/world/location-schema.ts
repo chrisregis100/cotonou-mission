@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { INTERACTABLE_KINDS } from "@/game/interactions/interaction-system";
+
 const vector2Schema = z.tuple([z.number(), z.number()]);
 const vector3Schema = z.tuple([z.number(), z.number(), z.number()]);
 const colorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/);
@@ -21,6 +23,17 @@ const surfaceSchema = z.object({
   size: vector2Schema,
 });
 
+const interactableSchema = z.object({
+  id: z.string().min(1),
+  kind: z.enum(INTERACTABLE_KINDS),
+  label: z.string().min(1),
+  /** Feet position: [x, y, z]. */
+  position: vector3Schema,
+  rotationY: z.number().default(0),
+  radius: z.number().positive().optional(),
+  dialogueId: z.string().min(1),
+});
+
 export const locationSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
@@ -32,8 +45,10 @@ export const locationSchema = z.object({
   roads: z.array(surfaceSchema),
   sidewalks: z.array(surfaceSchema),
   buildings: z.array(buildingSchema),
+  interactables: z.array(interactableSchema).default([]),
 });
 
 export type LocationData = z.infer<typeof locationSchema>;
+export type InteractableData = z.infer<typeof interactableSchema>;
 export type BuildingData = z.infer<typeof buildingSchema>;
 export type SurfaceData = z.infer<typeof surfaceSchema>;
