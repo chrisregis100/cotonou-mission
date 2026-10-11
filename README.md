@@ -20,5 +20,5 @@ pnpm dev          # http://localhost:3000
 | `pnpm typecheck` | Vérification TypeScript |
 | `pnpm lint` | ESLint |
 | `pnpm test` | Tests unitaires (Vitest) |
-| `pnpm test:e2e` | Smoke tests navigateur (Playwright, installer Chromium via `pnpm exec playwright install chromium`) |
+| `pnpm test:e2e` | Smoke tests navigateur (Playwright ; `pnpm exec playwright install chromium`, ou `PLAYWRIGHT_CHANNEL=chrome` pour utiliser Chrome installé) |
 | `pnpm assets:character <in.gltf> <out.glb>` | Régénère le GLB du personnage de test |

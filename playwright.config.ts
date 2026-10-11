@@ -16,6 +16,8 @@ export default defineConfig({
       name: "chromium",
       use: {
         ...devices["Desktop Chrome"],
+        // Set PLAYWRIGHT_CHANNEL=chrome to reuse a locally installed Google Chrome.
+        channel: process.env.PLAYWRIGHT_CHANNEL,
         launchOptions: {
           args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"],
         },
